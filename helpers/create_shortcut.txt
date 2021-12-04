@@ -1,0 +1,5 @@
+# Networking script
+./helpers/create.sh Udagram-network-stack network.yml network-parameters.json
+
+# Server script
+./helpers/create.sh Udagram-servers-stack servers.yml servers-parameters.json
