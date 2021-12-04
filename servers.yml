@@ -58,10 +58,8 @@ Resources:
           sudo systemctl start apache2.service
           cd /var/www/html
           echo "Udacity Demo Web Server Up and Running!" > index.html
-      # ToDo: AMI ID of Ubuntu Linux machine. Too get one, try creating a VM from the web console.
-      ImageId: ami-0747bdcabd34c712a
-      # ToDo: Change the key-pair name, as applicable to you.
-      KeyName: nd9990_keypair
+      ImageId: ami-0ed9277fb7eb570c9
+      #KeyName: ahmed-ec2-key | RSA
       SecurityGroups:
         - Ref: WebServerSecGroup
       InstanceType: t3.medium
@@ -118,10 +116,10 @@ Resources:
   WebAppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckIntervalSeconds: 40
+      HealthCheckIntervalSeconds: 10
       HealthCheckPath: /
       HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 20
+      HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       Port: 80
       Protocol: HTTP
