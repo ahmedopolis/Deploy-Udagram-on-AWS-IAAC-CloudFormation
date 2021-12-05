@@ -1,6 +1,6 @@
 ## Description
 
-A high-availability application is deployed using AWS CloudFormation. URL:
+A high-availability application is deployed using AWS CloudFormation. URL: http://udagr-webap-1lw3z0zzrckm5-1463087861.us-east-1.elb.amazonaws.com/
 
 ## Tools
 
