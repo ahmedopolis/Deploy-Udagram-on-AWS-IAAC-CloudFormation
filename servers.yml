@@ -9,6 +9,44 @@ Parameters:
     Type: String
 
 Resources:
+  UdacityS3ReadOnlyEC2:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+
+  RolePolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: AmazonS3ReadOnlyAccess
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:Get*
+              - s3:List*
+            Resource:
+              - arn:aws:s3:::website/*
+      Roles:
+        - Ref: UdacityS3ReadOnlyEC2
+
+  ProfileWithRolesForOurApp:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+        - Ref: UdacityS3ReadOnlyEC2
+
   LBSecGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -52,14 +90,16 @@ Resources:
     Properties:
       UserData:
         Fn::Base64: !Sub |
-          #!/bin/bash
-          sudo apt-get update -y
-          sudo apt-get install apache2 -y
-          sudo systemctl start apache2.service
+          #!/bin/bash -x
+          sudo yum update -y
+          sudo yum install httpd -y
           cd /var/www/html
-          echo "Udacity Demo Web Server Up and Running!" > index.html
+          sudo aws s3 cp s3://website/udagram-web-folder.zip .
+          sudo unzip -o udacity.zip
+          sudo mv udagram-web-folder/index.html .
+          sudo service httpd start
       ImageId: ami-0ed9277fb7eb570c9
-      #KeyName: ahmed-ec2-key | RSA
+      #KeyName: ahmed-udagram-key | RSA
       SecurityGroups:
         - Ref: WebServerSecGroup
       InstanceType: t3.medium
@@ -67,6 +107,8 @@ Resources:
         - DeviceName: "/dev/sdk"
           Ebs:
             VolumeSize: "10"
+            DeleteOnTermination: true
+            VolumeType: "gp2"
 
   WebAppGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
