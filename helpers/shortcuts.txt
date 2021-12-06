@@ -4,3 +4,5 @@
 # Create server script
 ./helpers/create.sh Udagram-servers-stack servers.yml servers-parameters.json
 
+#Create full configuration script
+./helpers/create.sh Udagram-stack fullconfig.yml parameters.json
