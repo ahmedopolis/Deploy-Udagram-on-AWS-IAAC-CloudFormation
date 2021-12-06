@@ -9,6 +9,29 @@ Parameters:
     Type: String
 
 Resources:
+  IAMRoleEC2Access:
+    Type: "AWS::IAM::Role"
+    Properties:
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+
+  ProfileWithRolesS3IP:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      Roles:
+        - Ref: "IAMRoleEC2Access"
+
   LBSecGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -34,8 +57,12 @@ Resources:
         Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
           FromPort: 22
@@ -52,13 +79,15 @@ Resources:
     Properties:
       UserData:
         Fn::Base64: !Sub |
-          #!/bin/bash apt-get update -y
+          #!/bin/bash 
+          apt-get update -y
           apt-get install apache2 -y
           systemctl start apache2.service
           cd /var/www/html
           echo "Udacity Demo Web Server Up and Running!" > index.html
       ImageId: ami-0ed9277fb7eb570c9
-      #KeyName: ahmed-udagram-key | RSA
+      KeyName: ahmed-ec2-key
+      IamInstanceProfile: !Ref ProfileWithRolesS3IP
       SecurityGroups:
         - Ref: WebServerSecGroup
       InstanceType: t3.medium
@@ -117,12 +146,12 @@ Resources:
   WebAppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckIntervalSeconds: 10
+      HealthCheckIntervalSeconds: 40
       HealthCheckPath: /
       HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 5
+      HealthCheckTimeoutSeconds: 30
       HealthyThresholdCount: 2
-      Port: 80
+      Port: 8080
       Protocol: HTTP
       UnhealthyThresholdCount: 5
       VpcId:
