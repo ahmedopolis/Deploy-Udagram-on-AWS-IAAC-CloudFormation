@@ -8,6 +8,14 @@ Parameters:
     Description: The environment name
     Type: String
 
+  MinServers:
+    Description: Min number of servers for web application
+    Type: String
+
+  MaxServers:
+    Description: Max number of servers for web application
+    Type: String
+
 Resources:
   IAMRoleEC2Access:
     Type: "AWS::IAM::Role"
@@ -101,8 +109,8 @@ Resources:
         - Fn::ImportValue: !Sub "${EnvironmentName}-PRIV-NETS"
       LaunchConfigurationName:
         Ref: WebAppLaunchConfig
-      MinSize: "{MinServers}"
-      MaxSize: "{MaxServers}"
+      MinSize: "4" #${MinServers}
+      MaxSize: "4" #${MaxServers}
       TargetGroupARNs:
         - Ref: WebAppTargetGroup
 
