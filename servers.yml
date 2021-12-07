@@ -64,10 +64,6 @@ Resources:
           FromPort: 8080
           ToPort: 8080
           CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 0
@@ -86,7 +82,7 @@ Resources:
           cd /var/www/html
           echo "Udacity Demo Web Server Up and Running!" > index.html
       ImageId: ami-0ed9277fb7eb570c9
-      KeyName: ahmed-ec2-key
+      #KeyName: ahmed-ec2-key
       IamInstanceProfile: !Ref ProfileWithRolesS3IP
       SecurityGroups:
         - Ref: WebServerSecGroup
@@ -105,8 +101,8 @@ Resources:
         - Fn::ImportValue: !Sub "${EnvironmentName}-PRIV-NETS"
       LaunchConfigurationName:
         Ref: WebAppLaunchConfig
-      MinSize: "4"
-      MaxSize: "4"
+      MinSize: "{MinServers}"
+      MaxSize: "{MaxServers}"
       TargetGroupARNs:
         - Ref: WebAppTargetGroup
 
